@@ -15,50 +15,52 @@
 'use strict';
 
 // [START setup]
-var express = require('express');
-var session = require('express-session');
-var cookieParser = require('cookie-parser');
-var MemcachedStore = require('connect-memcached')(session);
-var publicIp = require('public-ip');
-var crypto = require('crypto');
+const express = require('express');
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
+const MemcachedStore = require('connect-memcached')(session);
+const publicIp = require('public-ip');
+const crypto = require('crypto');
+let MEMCACHE_URL = '127.0.0.1:11211';
+if (process.env.GAE_MEMCACHE_HOST && process.env.GAE_MEMCACHE_PORT) {
+  MEMCACHE_URL = `${process.env.GAE_MEMCACHE_HOST}:${process.env.GAE_MEMCACHE_PORT}`;
+}
 
-var app = express();
+const app = express();
 app.enable('trust proxy');
 // [END setup]
 
+console.log(MEMCACHE_URL);
 app.use(cookieParser());
 app.use(session({
   secret: 'your-secret-here',
   key: 'view:count',
   proxy: 'true',
   store: new MemcachedStore({
-    hosts: [process.env.MEMCACHE_URL || '127.0.0.1:11211']
+    hosts: [MEMCACHE_URL]
   })
 }));
 
-app.get('/', function (req, res, next) {
+app.get('/', (req, res, next) => {
   // Discover requester's public IP address
-  publicIp.v4(function (err, ip) {
-    if (err) {
-      return next(err);
-    }
-    var userIp = crypto.createHash('sha256').update(ip).digest('hex').substr(0, 7);
+  publicIp.v4().then((ip) => {
+    const userIp = crypto.createHash('sha256').update(ip).digest('hex').substr(0, 7);
 
     // This shows the hashed IP for each
-    res.write('<div>' + userIp + '</div>');
+    res.write(`<div>${userIp}</div>`);
 
     if (req.session.views) {
       req.session.views += 1;
     } else {
       req.session.views = 1;
     }
-    res.end('Viewed <strong>' + req.session.views + '</strong> times.');
-  });
+    res.end(`Viewed <strong>${req.session.views}</strong> times.`);
+  }).catch(next);
 });
 
 // [START listen]
-var PORT = process.env.PORT || 8080;
-app.listen(PORT, function () {
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
   console.log('App listening on port %s', PORT);
   console.log('Press Ctrl+C to quit.');
 });
