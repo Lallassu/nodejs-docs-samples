@@ -13,11 +13,11 @@
 
 'use strict';
 
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 // [START hello_world]
-router.get('/', function (req, res) {
+router.get('/', (req, res) => {
   res.render('index', {
     title: 'Hello World! Express.js on Google App Engine.'
   });

@@ -15,17 +15,18 @@
 // [START app]
 'use strict';
 
-var exec = require('child_process').exec;
-var express = require('express');
+const exec = require('child_process').exec;
+const express = require('express');
 
-var app = express();
+const app = express();
 
-app.get('/', function (req, res, next) {
+app.get('/', (req, res, next) => {
   // Get the output from the "fortune" program. This is installed into the
   // environment by the Dockerfile.
-  exec('/usr/games/fortune', function (err, stdout) {
+  exec('/usr/games/fortune', (err, stdout) => {
     if (err) {
-      return next(err);
+      next(err);
+      return;
     }
 
     res.set('Content-Type', 'text/plain');
@@ -33,8 +34,9 @@ app.get('/', function (req, res, next) {
   });
 });
 
-var server = app.listen(process.env.PORT || 8080, function () {
-  console.log('App listening on port %s', server.address().port);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, function () {
+  console.log(`App listening on port ${PORT}`);
   console.log('Press Ctrl+C to quit.');
 });
 // [END app]

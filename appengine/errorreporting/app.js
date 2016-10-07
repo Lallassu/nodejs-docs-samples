@@ -16,11 +16,11 @@
 'use strict';
 
 // [START setup]
-var express = require('express');
-var winston = require('winston');
+const express = require('express');
+const winston = require('winston');
 
-var app = express();
-var logFile = '/var/log/app_engine/custom_logs/myapp.errors.log.json';
+const app = express();
+const logFile = '/var/log/app_engine/custom_logs/myapp.errors.log.json';
 
 winston.add(winston.transports.File, {
   filename: logFile
@@ -28,7 +28,7 @@ winston.add(winston.transports.File, {
 // [END setup]
 
 function report (err, req) {
-  var payload = {
+  const payload = {
     message: err.stack,
     context: {
       httpRequest: {
@@ -44,23 +44,22 @@ function report (err, req) {
   winston.error(payload);
 }
 
-app.get('/', function (req, res, next) {
+app.get('/', (req, res, next) => {
   next(new Error('something is wrong!'));
 });
 
-app.use(function (err, req, res, next) {
+app.use((err, req, res, next) => {
   report(err, req);
   res.status(500).send(err.message || 'Something broke!');
 });
 
 // [START listen]
-var PORT = process.env.PORT || 8080;
-app.listen(PORT, function () {
-  console.log('App listening on port %s', PORT);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}`);
   console.log('Press Ctrl+C to quit.');
 });
 // [END listen]
 // [END app]
 
 module.exports = app;
-
