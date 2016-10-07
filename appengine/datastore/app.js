@@ -16,10 +16,10 @@
 'use strict';
 
 // [START setup]
-var express = require('express');
-var crypto = require('crypto');
+const express = require('express');
+const crypto = require('crypto');
 
-var app = express();
+const app = express();
 app.enable('trust proxy');
 
 // By default, the client will authenticate using the service account file
@@ -27,10 +27,10 @@ app.enable('trust proxy');
 // the project specified by the GCLOUD_PROJECT environment variable. See
 // https://googlecloudplatform.github.io/gcloud-node/#/docs/google-cloud/latest/guides/authentication
 // These environment variables are set automatically on Google App Engine
-var Datastore = require('@google-cloud/datastore');
+const Datastore = require('@google-cloud/datastore');
 
 // Instantiate a datastore client
-var datastore = Datastore();
+const datastore = Datastore();
 // [END setup]
 
 // [START insertVisit]
@@ -44,11 +44,12 @@ function insertVisit (visit, callback) {
   datastore.save({
     key: datastore.key('visit'),
     data: visit
-  }, function (err) {
+  }, (err) => {
     if (err) {
-      return callback(err);
+      callback(err);
+      return;
     }
-    return callback();
+    callback();
   });
 }
 // [END insertVisit]
@@ -60,51 +61,53 @@ function insertVisit (visit, callback) {
  * @param {function} callback The callback function.
  */
 function getVisits (callback) {
-  var query = datastore.createQuery('visit')
-    .order('-timestamp')
+  const query = datastore.createQuery('visit')
+    .order('timestamp', { descending: true })
     .limit(10);
 
-  datastore.runQuery(query, function (err, entities) {
+  datastore.runQuery(query, (err, entities) => {
     if (err) {
-      return callback(err);
+      callback(err);
+      return;
     }
-    return callback(null, entities.map(function (entity) {
-      return 'Time: ' + entity.data.timestamp + ', AddrHash: ' + entity.data.userIp;
-    }));
+    callback(null, entities.map((entity) => `Time: ${entity.data.timestamp}, AddrHash: ${entity.data.userIp}`));
   });
 }
 // [END getVisits]
 
-app.get('/', function (req, res, next) {
+app.get('/', (req, res, next) => {
   // Create a visit record to be stored in the database
-  var visit = {
+  const visit = {
     timestamp: new Date(),
     // Store a hash of the visitor's ip address
     userIp: crypto.createHash('sha256').update(req.ip).digest('hex').substr(0, 7)
   };
 
-  insertVisit(visit, function (err) {
+  insertVisit(visit, (err) => {
     if (err) {
-      return next(err);
+      next(err);
+      return;
     }
 
     // Query the last 10 visits from the datastore.
-    getVisits(function (err, visits) {
+    getVisits((err, visits) => {
       if (err) {
-        return next(err);
+        next(err);
+        return;
       }
 
-      return res
+      res
         .status(200)
         .set('Content-Type', 'text/plain')
-        .send('Last 10 visits:\n' + visits.join('\n'));
+        .send(`Last 10 visits:\n${visits.join('\n')}`);
     });
   });
 });
 
 // [START listen]
-var server = app.listen(process.env.PORT || 8080, function () {
-  console.log('App listening on port %s', server.address().port);
+const PORT = process.env.PORT || 8080;
+app.listen(process.env.PORT || 8080, () => {
+  console.log(`App listening on port ${PORT}`);
   console.log('Press Ctrl+C to quit.');
 });
 // [END listen]

@@ -1,6 +1,6 @@
 # Node.js Cloud Pub/Sub sample for Google App Engine
 
-This demonstrates how to send and receive messages using [Google Cloud Pub/Sub](https://cloud.google.com/pubsub) on [Google App Engine Managed VMs](https://cloud.google.com/appengine) using Node.js.
+This demonstrates how to send and receive messages using [Google Cloud Pub/Sub](https://cloud.google.com/pubsub) on [Google App Engine Flexible Environment](https://cloud.google.com/appengine) using Node.js.
 
 ## Setup
 
