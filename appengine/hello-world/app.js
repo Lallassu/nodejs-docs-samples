@@ -15,17 +15,17 @@
 // [START app]
 'use strict';
 
-var express = require('express');
+const express = require('express');
+const app = express();
 
-var app = express();
-
-app.get('/', function (req, res) {
+app.get('/', (req, res) => {
   res.status(200).send('Hello, world!');
 });
 
 // Start the server
-var server = app.listen(process.env.PORT || '8080', function () {
-  console.log('App listening on port %s', server.address().port);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}`);
   console.log('Press Ctrl+C to quit.');
 });
 // [END app]
